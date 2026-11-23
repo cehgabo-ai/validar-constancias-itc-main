@@ -1,0 +1,12 @@
+Options -Indexes
+
+<IfModule mod_mime.c>
+    AddType text/javascript .js .mjs
+    AddType application/wasm .wasm
+</IfModule>
+
+<IfModule mod_headers.c>
+    <FilesMatch "^(index\.html|revision-(inicio|core|evidencia)\.js|script-plataform\.js)$">
+        Header set Cache-Control "no-store"
+    </FilesMatch>
+</IfModule>

@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="es" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emisor de Constancias - ITCancún</title>
+    <link href="vendor/bootstrap/bootstrap.min.css" rel="stylesheet">
+
+    <script defer src="revision-inicio.js?v=20261106-7"></script>
+    <script defer src="qrcode.min.js"></script>
+    <script defer src="revision-core.js?v=20261106-7"></script>
+    <script defer src="revision-evidencia.js?v=20261106-7"></script>
+    <script defer src="script-plataform.js?v=20261106-7"></script>
+
+    <style>
+        body {
+            background-color: #0a1128;
+            background-image: radial-gradient(circle at 15% 50%, rgba(16, 185, 129, .15), transparent 40%),
+                              radial-gradient(circle at 85% 30%, rgba(37, 99, 235, .15), transparent 40%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+        }
+
+        .header, .card { width: 100%; max-width: 750px; }
+        .header {
+            background: rgba(255, 255, 255, .05);
+            border: 1px solid rgba(255, 255, 255, .1);
+        }
+
+        .header img { width: 55px; height: 55px; object-fit: contain; }
+        .header h1 { font-size: 22px; font-weight: 600; }
+        .header p { font-size: 13px; color: #94a3b8; }
+        .card {
+            background: rgba(15, 23, 42, .8);
+            border: 1px solid rgba(255, 255, 255, .08);
+        }
+
+        .section-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #38bdf8;
+            margin: 20px 0 12px;
+            padding-bottom: 6px;
+            border-bottom: 1px solid rgba(255, 255, 255, .1);
+        }
+
+        .section-title:first-child { margin-top: 0; }
+        .form-label { font-size: 13px; color: #cbd5e1; }
+        .form-control, .form-select { background-color: #101b30; border-color: #334155; }
+        .form-control[readonly] { color: #94a3b8; }
+        .info-box {
+            background: rgba(56, 189, 248, .1);
+            border-left: 4px solid #38bdf8;
+            color: #e0f2fe;
+            font-size: 13px;
+        }
+
+        .url-box {
+            background: rgba(0, 0, 0, .2);
+            color: #94a3b8;
+            font-size: 12px;
+            overflow-wrap: anywhere;
+        }
+
+        #qrArea {
+            min-height: 250px;
+            background: rgba(0, 0, 0, .2);
+            border: 1px dashed rgba(255, 255, 255, .15);
+        }
+
+        #qrArea canvas, #qrArea img { max-width: 100%; height: auto; }
+        .status { color: #34d399; font-size: 13px; }
+        #revisionEvidencia { font-size: 13px; }
+        #revisionEvidencia th { min-width: 110px; }
+        #revisionEvidencia td, #qrDetalle { overflow-wrap: anywhere; white-space: pre-wrap; }
+        #textoPDF { white-space: pre-wrap; overflow-wrap: anywhere; max-height: 260px; overflow: auto; }
+        #revisionEvidencia .form-control { font-size: 13px; }
+    </style>
+</head>
+<body class="d-flex flex-column align-items-center px-3 py-4 py-md-5">
+
+    <div class="header d-flex align-items-center gap-3 rounded-4 shadow-sm p-3 p-sm-4 mb-3">
+        <img src="logo.png" alt="ITC" class="bg-white rounded-3 p-1 flex-shrink-0">
+        <div>
+            <h1 class="mb-1">Emisor de Constancias</h1>
+            <p class="mb-0">Instituto Tecnológico de Cancún · Subdirección Académica</p>
+        </div>
+    </div>
+
+    <div class="card rounded-4 shadow p-3 p-sm-4">
+        <div class="section-title">📋 DATOS DEL ALUMNO</div>
+        <div class="row g-3 mb-3">
+            <div class="field full col-12">
+                <label class="form-label" for="nombre">Nombre completo</label>
+                <input class="form-control" type="text" id="nombre" placeholder="Ej: Manuel Felipe Poot Koh">
+            </div>
+        </div>
+        <div class="row g-3 mb-3">
+            <div class="field col-12 col-sm-6">
+                <label class="form-label" for="noControl">No. de control</label>
+                <input class="form-control" type="text" id="noControl" placeholder="Ej: 21530614">
+            </div>
+            <div class="field col-12 col-sm-6">
+                <label class="form-label" for="fecha">Fecha de emisión</label>
+                <input class="form-control" type="date" id="fecha">
+            </div>
+        </div>
+
+        <div class="section-title">🎓 CARRERA DEL ALUMNO</div>
+        <div class="row g-3 mb-3">
+            <div class="field full col-12">
+                <label class="form-label" for="carrera">Carrera</label>
+                <select class="form-select" id="carrera" onchange="actualizarInfoFormato()">
+                    <option value="">— Selecciona la carrera —</option>
+                    <optgroup label="INGENIERÍAS">
+                        <option value="Ingeniería en Sistemas Computacionales">Ingeniería en Sistemas Computacionales</option>
+                        <option value="Ingeniería en Arquitectura">Ingeniería en Arquitectura</option>
+                        <option value="Ingeniería Civil">Ingeniería Civil</option>
+                        <option value="Ingeniería Electromecánica">Ingeniería Electromecánica</option>
+                        <option value="Ingeniería Mecatrónica">Ingeniería Mecatrónica</option>
+                        <option value="Ingeniería Ferroviaria">Ingeniería Ferroviaria</option>
+                    </optgroup>
+                    <optgroup label="ECONÓMICO-ADMINISTRATIVAS">
+                        <option value="Contador Público">Contador Público</option>
+                        <option value="Ingeniería en Gestión Empresarial">Ingeniería en Gestión Empresarial</option>
+                        <option value="Ingeniería en Administración">Ingeniería en Administración</option>
+                        <option value="Turismo">Turismo</option>
+                        <option value="Licenciatura en Administración">Licenciatura en Administración</option>
+                    </optgroup>
+                </select>
+            </div>
+        </div>
+
+        <div class="info-box rounded-2 p-3 mb-3" id="infoFormato">
+            ℹ️ Selecciona una carrera para ver quién firma la constancia.
+        </div>
+
+        <div class="section-title">📚 DATOS DEL CURSO</div>
+        <div class="row g-3 mb-3">
+            <div class="field full col-12">
+                <label class="form-label" for="curso">Selecciona el Curso MOOC (Catálogo Oficial)</label>
+                <select class="form-select" id="curso">
+                    <option value="">— Selecciona el curso —</option>
+                    <option value="Diseño de Experimentos con un Factor">Diseño de Experimentos con un Factor</option>
+                    <option value="Estimación estadística">Estimación estadística</option>
+                    <option value="Herramientas de Gestión y comunicación en la nube">Herramientas de Gestión y comunicación en la nube</option>
+                    <option value="Algebra Lineal">Algebra Lineal</option>
+                    <option value="Aritmética y principios de Algebra">Aritmética y principios de Algebra</option>
+                    <option value="GL English for the Semiconductor Industry">GL English for the Semiconductor Industry</option>
+                    <option value="Desarrollo Sustentable, nuestro futuro compartido">Desarrollo Sustentable, nuestro futuro compartido</option>
+                    <option value="Emprendimientos colectivos basados en economía social solidaria">Emprendimientos colectivos basados en economía social solidaria</option>
+                    <option value="Zentra tus Finanzas I">Zentra tus Finanzas I</option>
+                    <option value="Zentra tus Finanzas II">Zentra tus Finanzas II</option>
+                    <option value="Química: Introducción a la Teoría Cuántica">Química: Introducción a la Teoría Cuántica</option>
+                    <option value="Aprendizaje básico de Lengua Materna Xiiuy">Aprendizaje básico de Lengua Materna Xiiuy</option>
+                    <option value="Análisis Estratégico de la Innovación">Análisis Estratégico de la Innovación</option>
+                    <option value="Entendiendo el cálculo integral">Entendiendo el cálculo integral</option>
+                    <option value="Fundamentos de las redes inalámbricas y sus aplicaciones, la esencia de lo intangible">Fundamentos de las redes inalámbricas y sus aplicaciones, la esencia de lo intangible</option>
+                    <option value="Introduction to Microelectronics and Nanoelectronics">Introduction to Microelectronics and Nanoelectronics</option>
+                    <option value="Como crear y administrar un curso en MOODLE">Como crear y administrar un curso en MOODLE</option>
+                    <option value="Ética, el ser humano y la ciencia">Ética, el ser humano y la ciencia</option>
+                    <option value="Desarrollo de Habilidades Blandas con Enfoque Humanista">Desarrollo de Habilidades Blandas con Enfoque Humanista</option>
+                    <option value="Dinámica de Cuerpos Rígidos: Cinemática y Cinética">Dinámica de Cuerpos Rígidos: Cinemática y Cinética</option>
+                    <option value="Investigación, Descubriendo hechos y principios">Investigación, Descubriendo hechos y principios</option>
+                    <option value="Probabilidad y estadística">Probabilidad y estadística</option>
+                    <option value="Uso de TIC en distribuciones de probabilidad continuas">Uso de TIC en distribuciones de probabilidad continuas</option>
+                    <option value="Dibujo asistido por computadora en la nube">Dibujo asistido por computadora en la nube</option>
+                    <option value="Programación para centro de maquinado vertical con software CAD/CAM">Programación para centro de maquinado vertical con software CAD/CAM</option>
+                    <option value="Educación Inclusiva">Educación Inclusiva</option>
+                    <option value="Tabla periódica y propiedades de los elementos">Tabla periódica y propiedades de los elementos</option>
+                    <option value="Gestión de Datos en Excel Básico 1">Gestión de Datos en Excel Básico 1</option>
+                    <option value="Programación Básica en Python">Programación Básica en Python</option>
+                    <option value="Simulación de tiempos estándar con ProModel">Simulación de tiempos estándar con ProModel</option>
+                    <option value="Fundamentos vectoriales y estática de la partícula">Fundamentos vectoriales y estática de la partícula</option>
+                    <option value="Dinámica de Partículas: cinemática y cinética">Dinámica de Partículas: cinemática y cinética</option>
+                    <option value="Calculo Diferencial">Calculo Diferencial</option>
+                    <option value="Uso de la Madurez Tecnológica (TRL) en la Innovación y Transferencia de Tecnología">Uso de la Madurez Tecnológica (TRL) en la Innovación y Transferencia de Tecnología</option>
+                    <option value="Elaboración de Proyectos de Innovación y Transferencia Tecnológica bajo el Enfoque de Marco Lógico">Elaboración de Proyectos de Innovación y Transferencia Tecnológica bajo el Enfoque de Marco Lógico</option>
+                    <option value="Modelo Talento Emprendedor">Modelo Talento Emprendedor</option>
+                    <option value="EducaTec: Mi dinero seguro en el mundo digital">EducaTec: Mi dinero seguro en el mundo digital</option>
+                    <option value="Construyendo la Base Financiera de tu Emprendimiento">Construyendo la Base Financiera de tu Emprendimiento</option>
+                    <option value="Lengua de Señas Mexicana Básico 1">Lengua de Señas Mexicana Básico 1</option>
+                    <option value="Lengua Materna Maya 2: Maayat'aan ka'ap'éel.">Lengua Materna Maya 2: Maayat'aan ka'ap'éel.</option>
+                    <option value="Lengua Materna Maya 1: Maayat'aan jump'éel.">Lengua Materna Maya 1: Maayat'aan jump'éel.</option>
+                    <option value="Inglés para la Industria Subacuática">Inglés para la Industria Subacuática</option>
+                    <option value="Introducción a la Microelectrónica y la nanoelectrónica">Introducción a la Microelectrónica y la nanoelectrónica</option>
+                    <option value="Inglés para la Industria de Semiconductores">Inglés para la Industria de Semiconductores</option>
+                </select>
+            </div>
+        </div>
+        <div class="row g-3 mb-3">
+            <div class="field col-12 col-sm-6">
+                <label class="form-label" for="plataforma">Plataforma</label>
+                <select class="form-select" id="plataforma">
+                    <option value="TecNM">MOOC TecNM</option>
+                </select>
+            </div>
+            <div class="field col-12 col-sm-6">
+                <label class="form-label" for="creditos">Créditos</label>
+                <input class="form-control" type="number" id="creditos" value="1" readonly>
+            </div>
+        </div>
+
+        <div class="section-title">📎 EVIDENCIA (REQUISITO)</div>
+        <div class="row g-3 mb-3">
+            <div class="field full col-12">
+                <label class="form-label" for="archivoPDF">Sube el certificado del curso en formato PDF</label>
+                <input class="form-control" type="file" id="archivoPDF" accept=".pdf,application/pdf" aria-describedby="ayudaPDF" required>
+                <div class="form-text" id="ayudaPDF">Lectura local: máximo 10 MB y 20 páginas. Se busca el QR del emisor en todas las páginas. El PDF no se envía a un servidor.</div>
+            </div>
+        </div>
+
+        <section id="revisionEvidencia" class="border border-secondary rounded-3 p-3 mb-3" aria-labelledby="tituloRevision">
+            <h2 id="tituloRevision" class="h6">Revisión de la evidencia del curso</h2>
+            <div id="avisoCargaLector" class="info-box rounded-2 p-3 mb-3" role="alert" hidden>
+                <p class="mb-2">No se pudo iniciar el lector de PDF. Recarga sus archivos y vuelve a seleccionar tu constancia.</p>
+                <button id="btnRecargarLector" type="button" class="btn btn-outline-info btn-sm">Recargar lector</button>
+            </div>
+            <div id="avisoArchivoLocal" class="info-box rounded-2 p-3 mb-3" role="alert" hidden>
+                <strong>Abre la página desde XAMPP.</strong>
+                <p class="mb-2">Coloca la carpeta <code>constancias-tecnm</code> dentro de <code>htdocs</code>, inicia Apache en el panel de XAMPP y abre la dirección local indicada. Conserva Apache iniciado mientras utilizas la página.</p>
+                <a class="btn btn-outline-info btn-sm" href="http://localhost/constancias-tecnm/">Abrir página en localhost</a>
+            </div>
+            <div class="d-flex flex-wrap gap-2 mb-2">
+                <button type="button" id="btnRevisar" class="btn btn-outline-info btn-sm">Revisar PDF</button>
+                <button type="button" id="btnCancelarRevision" class="btn btn-outline-secondary btn-sm" hidden>Cancelar lectura</button>
+                <a id="abrirPDF" class="btn btn-outline-light btn-sm" target="_blank" rel="noopener noreferrer" hidden>Ver PDF adjunto</a>
+            </div>
+            <p id="progresoRevision" role="status" aria-live="polite">Selecciona un PDF para iniciar la revisión.</p>
+            <p><strong>Comparación con el original del emisor:</strong> <span id="estadoEmisor">Pendiente de revisión del original</span></p>
+            <p id="estadoDescarga" class="text-body-secondary" role="status" aria-live="polite">Descarga bloqueada: verifica nombre, curso y fecha visible y resuelve cualquier diferencia con el original.</p>
+            <p class="text-body-secondary">La verificación compara únicamente el PDF adjunto con la constancia original enlazada por su QR. Las lecturas dudosas quedan pendientes de revisión por la institución.</p>
+            <ul id="avisosRevision" class="text-warning"></ul>
+            <div class="table-responsive">
+                <table class="table table-sm align-middle">
+                    <caption>Datos leídos del PDF. Se cotejan únicamente con el original del emisor.</caption>
+                    <thead><tr><th scope="col">Dato</th><th scope="col">PDF adjunto</th></tr></thead>
+                    <tbody id="datosRevision"></tbody>
+                </table>
+            </div>
+            <label class="form-label" for="qrEncontrados">QR encontrados en el PDF del curso</label>
+            <select id="qrEncontrados" class="form-select form-select-sm mb-2" disabled><option>Sin lectura</option></select>
+            <p id="qrDetalle">No hay un enlace del emisor disponible.</p>
+            <a id="abrirOriginal" class="btn btn-primary btn-sm mb-3" target="_blank" rel="noopener noreferrer" referrerpolicy="no-referrer" hidden>Abrir constancia original ↗</a>
+            <p id="detalleConsultaOriginal" role="status" aria-live="polite"></p>
+            <div id="comparacionOriginal" class="table-responsive" hidden>
+                <table class="table table-sm align-middle">
+                    <caption>Se compara el PDF con los datos leídos en la página del emisor.</caption>
+                    <thead><tr><th scope="col">Dato</th><th scope="col">PDF adjunto</th><th scope="col">Original del emisor</th><th scope="col">Resultado</th></tr></thead>
+                    <tbody id="datosOriginal"></tbody>
+                </table>
+            </div>
+            <p class="text-body-secondary">Solo se habilitan enlaces HTTPS cuyo dominio sea exactamente mooc.tecnm.mx, independientemente de la plataforma elegida. Al abrirlos, comprueba también la dirección final y que se muestre una constancia, no un acceso o un error.</p>
+            <!-- Herramienta asistida para una futura interfaz administrativa. No autentica ni aprueba. -->
+            <details id="revisionManual" hidden>
+                <summary>Comparar manualmente con la constancia original</summary>
+                <p class="mt-2">Abre el original y transcribe lo que muestra. Estos datos son anotaciones locales sin verificación automática ni aprobación protegida. Si no hay texto extraíble, usa también «Ver PDF adjunto»; puede requerir OCR.</p>
+                <label class="form-label" for="situacionOriginal">Resultado al abrir el original</label>
+                <select id="situacionOriginal" class="form-select form-select-sm mb-2">
+                    <option value="pendiente">Sin revisar</option>
+                    <option value="visible">Se muestra la constancia original</option>
+                    <option value="inexistente">Constancia inexistente / página de error</option>
+                    <option value="inaccesible">Enlace inaccesible</option>
+                    <option value="sesion">Solicita iniciar sesión</option>
+                </select>
+                <div class="row g-2 mb-2">
+                    <div class="col-12 col-sm-6"><label class="form-label" for="originalNombre">Nombre en el original</label><input id="originalNombre" class="form-control" maxlength="500" autocomplete="off"></div>
+                    <div class="col-12 col-sm-6"><label class="form-label" for="originalCurso">Curso en el original</label><input id="originalCurso" class="form-control" maxlength="500" autocomplete="off"></div>
+                    <div class="col-12 col-sm-6"><label class="form-label" for="originalClave">Clave del curso en el original</label><input id="originalClave" class="form-control" maxlength="500" autocomplete="off"></div>
+                    <div class="col-12 col-sm-6"><label class="form-label" for="originalFechaDocumento">Fecha visible en el original</label><input id="originalFechaDocumento" class="form-control" maxlength="100" placeholder="Ej.: 25 de octubre de 2026" autocomplete="off"></div>
+                </div>
+                <p id="resultadoManual" role="status" aria-live="polite">Pendiente de revisión del original.</p>
+            </details>
+            <details class="mt-3"><summary>Texto extraído (contenido sin verificar)</summary><pre id="textoPDF" class="mt-2 small"></pre></details>
+            <p class="text-body-secondary mt-3 mb-0">Si no se puede consultar el original o algún dato resulta dudoso, tu constancia queda pendiente de revisión por la institución.</p>
+        </section>
+
+        <div class="section-title">🔖 FOLIO DE VALIDACIÓN</div>
+        <div class="folio-group d-flex flex-column flex-sm-row gap-2">
+            <input class="form-control" type="text" id="folio" readonly placeholder="Genera un folio primero">
+            <button class="btn btn-warning btn-sm text-nowrap px-3" onclick="generarFolio()">🔄 Generar</button>
+        </div>
+        <div class="url-box rounded-2 p-2 mt-2 font-monospace" id="urlPreview">URL de validación: —</div>
+
+        <button class="btn-main btn btn-success w-100 fw-bold py-3 mt-3" id="btnGenerar" onclick="generarTodo()" aria-describedby="estadoDescarga" disabled>✅ GENERAR CONSTANCIA</button>
+
+        <div id="qrArea" class="d-flex align-items-center justify-content-center text-center rounded-3 p-2 mt-4"><p class="text-body-secondary mb-0">El QR institucional aparecerá aquí</p></div>
+        <div class="status text-center fw-semibold mt-2" id="status"></div>
+
+        <div class="actions d-flex flex-column flex-sm-row gap-2 mt-3">
+            <button class="btn-pdf btn btn-danger flex-fill py-2" id="btnPDF" onclick="generarPDF()" aria-describedby="estadoDescarga" disabled>📄 Descargar Constancia (PDF)</button>
+            <button class="btn-qr btn btn-primary flex-fill py-2" id="btnGuardarQR" onclick="guardarQR()" aria-describedby="estadoDescarga" disabled>💾 Guardar QR</button>
+            <button class="btn-hist btn btn-secondary flex-fill py-2" onclick="descargarHistorial()">📊 Historial</button>
+        </div>
+    </div>
+</body>
+</html>
